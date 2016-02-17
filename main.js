@@ -1,6 +1,8 @@
 /**
  * Created by Pain on 16.02.2016.
  */
+/* При выполнении тестjd был использован google */
+
 var myObject = (function () {
 
     var cons = function () {
@@ -13,18 +15,17 @@ var myObject = (function () {
 
     var index = {
         DOM: {
-            clas: function (el, className) {
+            ready: function (callback) {
+                if (document && document.readyState && document.readyState === "complete") {
+                    return callback();
+                }
+                if (window.addEventListener) {
+                    window.addEventListener("DOMContentLoaded", callback, false);
+                }
 
-                    return el.className && new RegExp("(^|\\s)" + className + "(\\s|$)").test(el.className);
-
+                return true;
             },
 
-            createBtn: function (txt, callback) {
-                var btn = document.createElement('button');
-                btn.innerHTML = txt;
-                index.DOM.addEvent(btn, 'click', callback);
-                document.getElementById('buttons').appendChild(btn);
-            },
             addEvent: function (el, evType, fn) {
 
                 if (el.addEventListener) {
@@ -36,6 +37,20 @@ var myObject = (function () {
                     }
                 }
             },
+
+            clas: function (el, className) {
+
+                return el.className && new RegExp("(^|\\s)" + className + "(\\s|$)").test(el.className);
+
+            },
+
+            createBtn: function (txt, callback) {
+                var btn = document.createElement('button');
+                btn.innerHTML = txt;
+                index.DOM.addEvent(btn, 'click', callback);
+                document.getElementById('buttons').appendChild(btn);
+            },
+
 
             getTable: function () {
                 var tables = document.getElementsByTagName('table');
@@ -52,18 +67,6 @@ var myObject = (function () {
                 newTable = newTable.cloneNode(true);
 
                 return newTable;
-
-            },
-
-            ready: function (callback) {
-                if (document && document.readyState && document.readyState === "complete") {
-                    return callback();
-                }
-                if (window.addEventListener) {
-                    window.addEventListener("DOMContentLoaded", callback, false);
-                }
-
-                return true;
             }
 
         },
@@ -149,8 +152,14 @@ var myObject = (function () {
                     newTable = index.DOM.cloneTable();
                     newTable.className = newClass;
                     for (var i = 0, r = [], rs = newTable.rows; i < rs.length, r = rs[i]; i++) {
+                        if (rs[i].style.display = 'none') {
+                            rs[i].style.display = ''
+                        }
                         r.insertBefore(r.children[2], r.children[1]);
                         for (var c = 0, col = [], cols = r.cells; c < cols.length, col = cols[c]; c++) {
+                            if (col.style.display = 'none') {
+                                col.style.display = ''
+                            }
                             col.className = newClass;
                         }
                     }
@@ -163,12 +172,17 @@ var myObject = (function () {
                 index.DOM.createBtn('task_2', function () {
                     newTable = index.DOM.cloneTable();
                     newTable.className = newClass;
-                    for (var r = 0, row, rows = newTable.rows; r < rows.length;  r++) {
+                    for (var r = 0, row, rows = newTable.rows; r < rows.length; r++) {
                         row = rows[r];
+                        if (rows[r].style.display = 'none') {
+                            rows[r].style.display = ''
+                        }
                         for (var c = 0, col, cols = row.cells; c < cols.length; c++) {
                             col = cols[c];
+                            if (col.style.display = 'none') {
+                                col.style.display = ''
+                            }
                             col.className = newClass;
-
                             if (c == (cols.length - 1)) {
                                 var newCol = col.cloneNode(true);
                                 var lastCol = parseInt(col.innerHTML) + 1;
@@ -207,25 +221,27 @@ var myObject = (function () {
                 index.DOM.createBtn('task_4', function () {
                     var tables = document.getElementsByTagName('table');
                     var parm = [];
-                    for (var t = 0, table; t < tables.length, table = tables[t]; t++) {
+                    for (var t = 0, table; t < tables.length; t++) {
+                        table = tables[t];
                         if (!index.DOM.clas(table, 't1')) {
                             continue;
                         }
-                        for (var r = 1, i = 0, row, rows = table.rows; r < rows.length, row = rows[r]; r++) {
+                        for (var r = 1, i = 0, row, rows = table.rows; r < rows.length; r++) {
+                            row = rows[r];
                             var cols = row.cells;
                             var p2 = parseFloat(cols[1].innerHTML);
                             var p3 = parseFloat(cols[2].innerHTML);
                             var ps = p2 + p3;
                             if (ps > 5) {
-                                parm.push('r[' + i + '][p1]=' + cols[0].innerHTML);
-                                parm.push('r[' + i + '][ps]=' + ps);
+                                parm.push(i + 'p1=' + cols[0].innerHTML);
+                                parm.push(i + 'ps=' + ps);
                                 i++;
                             }
                         }
                         break;
                     }
                     if (parm.length) {
-                        var url = 'http://domain.com?' + parm.join('&');
+                        var url = 'http://domain.com?' + parm.join('|');
                         alert(url);
                         index.xml.get(url);
                     }
@@ -243,6 +259,19 @@ var myObject = (function () {
                     iframe.style.height = "800px";
                     iframe.src = url;
                     document.getElementById('iframes').appendChild(iframe);
+                    index.DOM.addEvent(iframe, 'load', function () {
+                        var d = iframe.contentDocument;
+                        var tables = d.getElementsByTagName('table');
+                        for (var t = 0, table; t < tables.length, table = tables[t]; t++) {
+                            for (var r = 0, row, rows = table.rows; r < rows.length, row = rows[r]; r++) {
+                                for (var c = 1, cols = row.cells; c < cols.length; c++) {
+                                    if (cols[2].innerHTML < 0) {
+                                        cols[2].style.display = 'none';
+                                    }
+                                }
+                            }
+                        }
+                    })
 
                 });
             },
@@ -259,12 +288,28 @@ var myObject = (function () {
                     iframe.style.height = "800px";
                     iframe.src = url;
                     document.getElementById('iframes').appendChild(iframe);
+                    index.DOM.addEvent(iframe, 'load', function () {
+                        var d = iframe.contentDocument;
+                        var g = 'Petya';
+                        var tables = d.getElementsByTagName('table');
+                        var table = tables[0];
+                        for (var r = 0, row, rows = table.rows; r < rows.length, row = rows[r]; r++) {
+                            if (row.cells[0].innerHTML != g) {
+                                continue;
+                            } else {
+                                rows[r].style.display = 'none';
+                            }
+
+
+                        }
+
+                    })
                 });
             },
 
             7: function () {
                 index.DOM.createBtn('task_7', function () {
-                    var regexp = /<!--\s*js:[ ]*(.*)?-->/i, matches;
+                    var regexp = /<!--\s*js:[ ]*(.*)?-->/i, comm;
                     if (comm = document.documentElement.innerHTML.match(regexp)) {
                         alert(comm[1]);
                     }
