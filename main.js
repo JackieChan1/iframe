@@ -1,7 +1,3 @@
-/**
- * Created by Pain on 16.02.2016.
- */
-/* При выполнении тестjd был использован google */
 
 var myObject = (function () {
 
